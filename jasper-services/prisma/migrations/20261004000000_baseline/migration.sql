@@ -1,6 +1,3 @@
--- CreateSchema
-CREATE SCHEMA IF NOT EXISTS "public";
-
 -- CreateEnum
 CREATE TYPE "ProductStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'ARCHIVED');
 
@@ -111,9 +108,17 @@ CREATE TABLE "orders" (
     "customer_phone" TEXT,
     "status" "OrderStatus" NOT NULL DEFAULT 'PENDING_PAYMENT',
     "subtotal" DECIMAL(10,2) NOT NULL,
+    "shipping_fee" DECIMAL(10,2) NOT NULL DEFAULT 0,
     "total" DECIMAL(10,2) NOT NULL,
     "currency" TEXT NOT NULL DEFAULT 'usd',
+    "stripe_session_id" TEXT,
     "stripe_payment_intent_id" TEXT,
+    "shipping_address1" TEXT,
+    "shipping_address2" TEXT,
+    "shipping_city" TEXT,
+    "shipping_state" TEXT,
+    "shipping_postal_code" TEXT,
+    "shipping_country" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -191,6 +196,9 @@ CREATE INDEX "products_category_id_idx" ON "products"("category_id");
 CREATE INDEX "products_status_idx" ON "products"("status");
 
 -- CreateIndex
+CREATE INDEX "products_slug_idx" ON "products"("slug");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "product_variants_sku_key" ON "product_variants"("sku");
 
 -- CreateIndex
@@ -222,6 +230,9 @@ CREATE UNIQUE INDEX "cart_items_id_cart_id_key" ON "cart_items"("id", "cart_id")
 
 -- CreateIndex
 CREATE UNIQUE INDEX "orders_order_number_key" ON "orders"("order_number");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "orders_stripe_session_id_key" ON "orders"("stripe_session_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "orders_stripe_payment_intent_id_key" ON "orders"("stripe_payment_intent_id");
@@ -285,3 +296,4 @@ ALTER TABLE "inventory_logs" ADD CONSTRAINT "inventory_logs_variant_id_fkey" FOR
 
 -- AddForeignKey
 ALTER TABLE "inventory_logs" ADD CONSTRAINT "inventory_logs_order_id_fkey" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
